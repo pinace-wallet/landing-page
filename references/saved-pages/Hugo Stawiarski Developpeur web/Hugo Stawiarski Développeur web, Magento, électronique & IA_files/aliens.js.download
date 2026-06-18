@@ -1,0 +1,226 @@
+/* Easter egg - Attaque d'aliens : ils tirent sur tes sections (elles tremblent),
+   tu les abats en cliquant dessus. Déclenché en sélectionnant du texte, +2s.
+   Vanilla canvas, sans librairie. window.startAlienAttack() pour le relancer (futur Labs). */
+(function(){
+  if(matchMedia('(hover:none)').matches) return; // desktop only (clic des aliens)
+
+  var MIN_SEL=10, active=false, used=false, warnEl=null, warnTimer=null;
+
+  function injectStyle(){
+    if(document.getElementById('alienstyle')) return;
+    var css=
+    '#alienCanvas{position:fixed;inset:0;z-index:8500;cursor:crosshair}'+
+    '#alienHud{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:8501;'+
+      'font-family:Outfit,system-ui,sans-serif;font-size:13.5px;font-weight:600;color:#f4eeff;'+
+      'background:rgba(20,14,34,.82);border:1px solid rgba(255,255,255,.14);border-radius:100px;'+
+      'padding:9px 18px;pointer-events:none;white-space:nowrap}'+
+    '#alienHud b{color:#c6ff3d}'+
+    '.alien-warn{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:8501;'+
+      'font-family:Outfit,system-ui,sans-serif;font-size:14px;font-weight:600;color:#ffd23d;'+
+      'background:rgba(20,14,34,.85);border:1px solid rgba(255,210,61,.4);border-radius:100px;'+
+      'padding:11px 20px;opacity:0;transition:opacity .3s ease,transform .3s ease;pointer-events:none}'+
+    '.alien-warn.show{opacity:1;transform:translateX(-50%)}'+
+    '.alien-modal{position:fixed;inset:0;z-index:8600;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(5,2,12,.8);backdrop-filter:blur(7px);font-family:Outfit,system-ui,sans-serif}'+
+    '.alien-box{max-width:460px;width:100%;background:#140e22;border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:36px 34px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.6)}'+
+    '.alien-box svg{margin:0 auto 16px;display:block}'+
+    '.alien-box h3{font-family:"Clash Display",Outfit,sans-serif;font-weight:600;font-size:27px;color:#f4eeff;margin:0 0 12px;letter-spacing:-.01em}'+
+    '.alien-box p{color:#a99cc4;font-size:15.5px;line-height:1.6;margin:0 0 26px}'+
+    '.alien-box p b{color:#c6ff3d}'+
+    '.alien-acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}'+
+    '.alien-acts button{font-family:inherit;font-weight:600;font-size:15px;padding:14px 28px;border-radius:100px;border:0;cursor:pointer;transition:transform .2s ease}'+
+    '.alien-acts button:hover{transform:translateY(-2px)}'+
+    '.alien-play{background:#c6ff3d;color:#0d0815}'+
+    '.alien-no{background:transparent;border:1px solid rgba(255,255,255,.22);color:#f4eeff}'+
+    '.alien-quit{position:fixed;top:16px;right:18px;z-index:8602;font-family:Outfit,system-ui,sans-serif;font-weight:700;font-size:14px;'+
+      'display:flex;align-items:center;gap:8px;background:#ff3d52;color:#fff;border:0;border-radius:100px;padding:11px 20px;cursor:pointer;box-shadow:0 10px 28px rgba(255,61,82,.4)}'+
+    '.alien-quit:hover{background:#ff5a6b}'+
+    '@keyframes alienShake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(3px,-2px)}'+
+      '30%,50%,70%{transform:translate(-4px,2px)}40%,60%{transform:translate(4px,-1px)}}'+
+    '.alien-hit{animation:alienShake .5s linear;outline:2px solid rgba(255,61,129,.85);outline-offset:3px;border-radius:6px}';
+    var st=document.createElement('style'); st.id='alienstyle'; st.textContent=css; document.head.appendChild(st);
+  }
+
+  // ---- déclencheur : sélection de texte + 2 s ----
+  document.addEventListener('selectionchange', function(){
+    if(active || used) return;
+    var ae=document.activeElement;
+    if(ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName)) return; // pas pendant la saisie
+    if(document.body.style.overflow==='hidden'){ // une fenêtre/overlay est ouverte
+      if(warnTimer){ clearTimeout(warnTimer); warnTimer=null; hideWarn(); }
+      return;
+    }
+    var s=(window.getSelection && window.getSelection().toString() || '').trim();
+    if(s.length>=MIN_SEL){
+      if(warnTimer) return;
+      showWarn();
+      warnTimer=setTimeout(function(){ warnTimer=null; hideWarn(); if(document.body.style.overflow==='hidden') return; start(); }, 2000);
+    } else if(warnTimer){ clearTimeout(warnTimer); warnTimer=null; hideWarn(); }
+  });
+
+  window.startAlienAttack=function(){ if(!active) start(); };
+
+  function showWarn(){ injectStyle(); if(!warnEl){ warnEl=document.createElement('div'); warnEl.className='alien-warn'; warnEl.textContent='Invasion imminente…'; document.body.appendChild(warnEl); } requestAnimationFrame(function(){ warnEl.classList.add('show'); }); }
+  function hideWarn(){ if(warnEl) warnEl.classList.remove('show'); }
+
+  function invaderSVG(color){
+    var rects='';
+    for(var r=0;r<INV.length;r++){ var row=INV[r]; for(var c=0;c<11;c++){ if(row.charAt(c)==='1') rects+='<rect x="'+c+'" y="'+r+'" width="1" height="1"/>'; } }
+    return '<svg width="77" height="56" viewBox="0 0 11 8" fill="'+color+'">'+rects+'</svg>';
+  }
+
+  // Popup d'intro : explique le jeu, propose de jouer ou de quitter.
+  function intro(){
+    if(active || modal) return;
+    injectStyle(); used=true;
+    curEl=document.getElementById('cur'); if(curEl) curEl.style.display='none';
+    document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden';
+    try{ window.getSelection().removeAllRanges(); }catch(e){}
+
+    modal=document.createElement('div'); modal.className='alien-modal';
+    modal.innerHTML='<div class="alien-box">'+invaderSVG('#c6ff3d')+
+      '<h3>Invasion détectée !</h3>'+
+      '<p>Des aliens attaquent la page et bombardent les sections. <b>Clique sur chaque alien</b> pour l\'abattre et repousser l\'invasion.<br>Tu peux quitter à tout moment (bouton rouge ou touche Échap).</p>'+
+      '<div class="alien-acts">'+
+        '<button class="alien-no" type="button">Non merci</button>'+
+        '<button class="alien-play" type="button">Défendre ma page</button>'+
+      '</div></div>';
+    document.body.appendChild(modal);
+    modal.querySelector('.alien-play').addEventListener('click', function(){ removeModal(); start(); });
+    modal.querySelector('.alien-no').addEventListener('click', function(){ removeModal(); restore(); });
+  }
+  function removeModal(){ if(modal && modal.parentNode) modal.parentNode.removeChild(modal); modal=null; }
+  function restore(){ if(curEl) curEl.style.display=''; document.documentElement.style.overflow=''; document.body.style.overflow=''; }
+
+  // ---- bitmap "invader" 11x8 ----
+  var INV=["00100000100","00010001000","00111111100","01101110110",
+           "11111111111","10111111101","10100000101","00011011000"];
+  var COLORS=['#c6ff3d','#ff3d81','#9b5cff','#3d7bff','#ffd23d'];
+
+  var canvas,ctx,DPR,W,H,raf,aliens,lasers,particles,targets,score,curEl,hud,autoEnd,lastT,quitBtn,modal;
+
+  function start(){
+    if(active) return; active=true; used=true;
+    injectStyle();
+    try{ window.getSelection().removeAllRanges(); }catch(e){}
+
+    DPR=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight;
+    canvas=document.createElement('canvas'); canvas.id='alienCanvas';
+    canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    document.body.appendChild(canvas);
+    ctx=canvas.getContext('2d'); ctx.scale(DPR,DPR);
+
+    curEl=document.getElementById('cur'); if(curEl) curEl.style.display='none';
+    document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden';
+
+    var sel='.label,.big,.tcard,.prow,.dom,.step,.quote,.qa,.shopcta,.heromid p,.about p,.about h2,.stat,.hbtn,.footmeta span,#heroParticles';
+    targets=[];
+    [].forEach.call(document.querySelectorAll(sel), function(el){
+      var r=el.getBoundingClientRect();
+      if(r.width<20||r.height<10) return;
+      if(r.bottom<0||r.top>H||r.right<0||r.left>W) return;
+      targets.push({el:el, cx:r.left+r.width/2, top:r.top});
+    });
+
+    aliens=[]; lasers=[]; particles=[]; score=0;
+    var n=10, cell=4;
+    for(var i=0;i<n;i++){
+      aliens.push({ x:60+Math.random()*(W-120), y:60+Math.random()*Math.min(260,H*0.32),
+        ph:Math.random()*6.28, c:COLORS[i%COLORS.length], cell:cell, w:11*cell, h:8*cell,
+        cd:1200+Math.random()*2200, t:0, alive:true, dx:(Math.random()-0.5)*0.5 });
+    }
+
+    hud=document.createElement('div'); hud.id='alienHud'; document.body.appendChild(hud);
+    quitBtn=document.createElement('div'); quitBtn.className='eggbar';
+    quitBtn.innerHTML='<p><b>Invasion !</b> Cliquez sur les aliens pour les abattre. Échap pour quitter.</p>'+
+      '<button class="eggbtn quit" type="button">Quitter</button>';
+    document.body.appendChild(quitBtn);
+    quitBtn.querySelector('button').addEventListener('click', end);
+    requestAnimationFrame(function(){ quitBtn.classList.add('show'); });
+    canvas.addEventListener('click', onShoot);
+    document.addEventListener('keydown', onKey);
+    autoEnd=setTimeout(function(){ end(); }, 75000);
+
+    lastT=performance.now();
+    raf=requestAnimationFrame(frame);
+  }
+
+  function frame(now){
+    var dt=Math.min(40, now-lastT); lastT=now;
+    update(dt); render();
+    if(hud){
+      var alive=0; for(var i=0;i<aliens.length;i++) if(aliens[i].alive) alive++;
+      hud.innerHTML = alive>0
+        ? 'Aliens restants : <b>'+alive+'</b> &nbsp;·&nbsp; Score : <b>'+score+'</b>'
+        : 'Invasion repoussée ! &nbsp;·&nbsp; Score : <b>'+score+'</b>';
+    }
+    var allDead=true; for(var k=0;k<aliens.length;k++){ if(aliens[k].alive){ allDead=false; break; } }
+    if(allDead){ if(!canvas._won){ canvas._won=true; setTimeout(end, 2400); } }
+    raf=requestAnimationFrame(frame);
+  }
+
+  function update(dt){
+    for(var i=0;i<aliens.length;i++){
+      var a=aliens[i]; if(!a.alive) continue;
+      a.ph+=dt*0.004; a.x+=a.dx*dt*0.05;
+      if(a.x<40||a.x>W-40) a.dx*=-1;
+      a.t+=dt;
+      if(a.t>a.cd && targets.length){
+        a.t=0; a.cd=1400+Math.random()*2600;
+        var tg=targets[(Math.random()*targets.length)|0];
+        lasers.push({x:a.x, y:a.y+a.h/2, vy:0.45+Math.random()*0.3, ty:tg.top, el:tg.el, hit:false});
+      }
+    }
+    for(var j=lasers.length-1;j>=0;j--){
+      var L=lasers[j]; L.y+=L.vy*dt;
+      if(!L.hit && L.y>=L.ty){ L.hit=true; hitTarget(L.el); }
+      if(L.y>H+20) lasers.splice(j,1);
+    }
+    for(var p=particles.length-1;p>=0;p--){
+      var P=particles[p]; P.x+=P.vx*dt*0.06; P.y+=P.vy*dt*0.06; P.vy+=0.02*dt; P.life-=dt;
+      if(P.life<=0) particles.splice(p,1);
+    }
+  }
+
+  function hitTarget(el){ if(!el) return; el.classList.add('alien-hit'); setTimeout(function(){ el.classList.remove('alien-hit'); }, 520); }
+
+  function drawInvader(x,y,c,color){
+    ctx.fillStyle=color;
+    for(var r=0;r<INV.length;r++){ var row=INV[r]; for(var col=0;col<11;col++){ if(row.charAt(col)==='1') ctx.fillRect(x+col*c, y+r*c, c, c); } }
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<aliens.length;i++){ var a=aliens[i]; if(!a.alive) continue; var oy=Math.sin(a.ph)*6; drawInvader(a.x-a.w/2, a.y-a.h/2+oy, a.cell, a.c); }
+    ctx.lineWidth=3; ctx.lineCap='round'; ctx.strokeStyle='#ff3d81';
+    for(var j=0;j<lasers.length;j++){ var L=lasers[j]; ctx.beginPath(); ctx.moveTo(L.x,L.y); ctx.lineTo(L.x,L.y-14); ctx.stroke(); }
+    for(var p=0;p<particles.length;p++){ var P=particles[p]; ctx.globalAlpha=Math.max(0,P.life/P.max); ctx.fillStyle=P.c; ctx.fillRect(P.x,P.y,3,3); }
+    ctx.globalAlpha=1;
+  }
+
+  function onShoot(e){
+    for(var i=0;i<aliens.length;i++){
+      var a=aliens[i]; if(!a.alive) continue;
+      if(e.clientX>=a.x-a.w/2 && e.clientX<=a.x+a.w/2 && e.clientY>=a.y-a.h/2-6 && e.clientY<=a.y+a.h/2+6){
+        a.alive=false; score++; boom(a.x,a.y,a.c); return;
+      }
+    }
+  }
+  function boom(x,y,c){ for(var i=0;i<28;i++){ var ang=Math.random()*6.28, sp=1+Math.random()*4.2; particles.push({x:x,y:y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:620,max:620,c:Math.random()<0.5?c:'#ffffff'}); } }
+
+  function onKey(e){ if(e.key==='Escape') end(); }
+
+  function end(){
+    if(!active) return; active=false;
+    if(raf) cancelAnimationFrame(raf);
+    if(autoEnd) clearTimeout(autoEnd);
+    if(canvas){ canvas.removeEventListener('click', onShoot); if(canvas.parentNode) canvas.parentNode.removeChild(canvas); canvas=null; }
+    if(hud && hud.parentNode){ hud.parentNode.removeChild(hud); } hud=null;
+    if(quitBtn && quitBtn.parentNode){ quitBtn.parentNode.removeChild(quitBtn); } quitBtn=null;
+    removeModal();
+    document.removeEventListener('keydown', onKey);
+    [].forEach.call(document.querySelectorAll('.alien-hit'), function(el){ el.classList.remove('alien-hit'); });
+    if(curEl) curEl.style.display='';
+    document.documentElement.style.overflow=''; document.body.style.overflow='';
+  }
+})();

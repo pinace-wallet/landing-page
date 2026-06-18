@@ -1,0 +1,169 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Pinace landing page tokens — see ../../DESIGN.md (single source of truth).
+  Palette inherited from the shipped extension (identity-preservation).
+  Theme is dark-only; we render <html class="dark">.
+*/
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Clash Display", var(--font-satoshi), sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Pinace brand scale (raw, for gradients/glows) */
+  --color-pinace-blue: var(--pinace-blue);
+  --color-pinace-blue-bright: var(--pinace-blue-bright);
+  --color-pinace-violet: var(--pinace-violet);
+  --color-pinace-pink: var(--pinace-pink);
+  --color-pinace-teal: var(--pinace-teal);
+  --color-pinace-amber: var(--pinace-amber);
+  --color-pinace-green: var(--pinace-green);
+
+  /* shadcn semantic tokens mapped to Pinace */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Fontshare families (loaded via <link> in layout) */
+  --font-satoshi: "Satoshi";
+
+  /* raw brand */
+  --pinace-blue: #006fee;
+  --pinace-blue-bright: #3d7bff;
+  --pinace-blue-soft: #9dc2eb;
+  --pinace-violet: #9b5cff;
+  --pinace-pink: #f31260;
+  --pinace-teal: #17c9a0;
+  --pinace-amber: #f5a524;
+  --pinace-green: #17c964;
+
+  --radius: 0.85rem;
+
+  /* dark theme (the only theme) */
+  --background: #000000;
+  --foreground: #fafafa;
+  --card: rgba(24, 24, 27, 0.5);
+  --card-foreground: #fafafa;
+  --popover: #0a0a0c;
+  --popover-foreground: #fafafa;
+  --primary: #006fee;
+  --primary-foreground: #ffffff;
+  --secondary: #18181b;
+  --secondary-foreground: #fafafa;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+  --accent: #18181b;
+  --accent-foreground: #fafafa;
+  --destructive: #f31260;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #006fee;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* hide native cursor on devices with a real pointer (custom cursor takes over) */
+  @media (hover: hover) and (pointer: fine) {
+    html.has-custom-cursor,
+    html.has-custom-cursor * {
+      cursor: none;
+    }
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--pinace-blue) 40%, transparent);
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  /* glass surface — purposeful use only (DESIGN.md) */
+  .glass {
+    background: var(--card);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid var(--border);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* mono on-chain data */
+  .onchain {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+  }
+  /* hero reveal rows */
+  .reveal-row {
+    overflow: hidden;
+    display: block;
+  }
+  .reveal-row > span {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}

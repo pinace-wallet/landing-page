@@ -1,0 +1,70 @@
+/* Bandeau de consentement cookies (CNIL/RGPD) - Google Consent Mode v2.
+   Google Analytics ne dépose aucun cookie tant que l'utilisateur n'a pas accepté.
+   L'utilisateur peut revenir sur son choix via tout lien [data-cookie-prefs]
+   (ou en appelant window.openCookiePrefs()). */
+(function(){
+  var KEY='cookieConsent';
+  var bar=null;
+
+  function read(){try{return localStorage.getItem(KEY);}catch(e){return null;}}
+
+  function injectStyles(){
+    if(document.getElementById('ckstyle'))return;
+    var css=''+
+    '.cookiebar{position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:580px;margin:0 auto;'+
+    'background:#140e22;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px 22px;'+
+    'display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;'+
+    'box-shadow:0 18px 55px rgba(0,0,0,.55);font-family:Outfit,system-ui,sans-serif;'+
+    'opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}'+
+    '.cookiebar.show{opacity:1;transform:none}'+
+    '.cookiebar p{color:#a99cc4;font-size:14px;line-height:1.5;margin:0;flex:1;min-width:220px}'+
+    '.cookiebar a{color:#c6ff3d;text-decoration:none}'+
+    '.cookiebar .ckbtns{display:flex;gap:10px}'+
+    '.cookiebar button{font-family:inherit;font-weight:600;font-size:14px;padding:11px 22px;border-radius:100px;border:0}'+
+    '.cookiebar .ck-refuse{background:transparent;border:1px solid rgba(255,255,255,.22);color:#f4eeff}'+
+    '.cookiebar .ck-accept{background:#c6ff3d;color:#0d0815}'+
+    '@media(hover:none){.cookiebar button{cursor:pointer}}'+
+    '@media(max-width:560px){.cookiebar{flex-direction:column;align-items:stretch}.cookiebar .ckbtns{justify-content:flex-end}}';
+    var st=document.createElement('style');st.id='ckstyle';st.textContent=css;document.head.appendChild(st);
+  }
+
+  function showBanner(){
+    injectStyles();
+    if(bar)return;
+    bar=document.createElement('div');
+    bar.className='cookiebar';
+    bar.setAttribute('role','dialog');
+    bar.setAttribute('aria-label','Consentement aux cookies');
+    bar.innerHTML='<p>Ce site utilise des cookies de mesure d\'audience (Google Analytics) pour comprendre sa fréquentation. '+
+      '<a href="mentions-legales.html">En savoir plus</a></p>'+
+      '<div class="ckbtns"><button class="ck-refuse" type="button">Refuser</button>'+
+      '<button class="ck-accept" type="button">Accepter</button></div>';
+    document.body.appendChild(bar);
+    requestAnimationFrame(function(){bar.classList.add('show');});
+    bar.querySelector('.ck-accept').addEventListener('click',function(){decide('granted');});
+    bar.querySelector('.ck-refuse').addEventListener('click',function(){decide('denied');});
+  }
+
+  function decide(value){
+    try{localStorage.setItem(KEY,value);}catch(e){}
+    if(typeof gtag==='function'){
+      gtag('consent','update',{analytics_storage: value==='granted' ? 'granted' : 'denied'});
+    }
+    if(bar){
+      var b=bar;bar=null;
+      b.classList.remove('show');
+      setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b);},400);
+    }
+  }
+
+  // Permet de rouvrir le bandeau (lien "Gérer les cookies")
+  window.openCookiePrefs=showBanner;
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-cookie-prefs]');
+    if(t){e.preventDefault();showBanner();}
+  });
+
+  // Premier passage : pas encore de choix -> on affiche le bandeau
+  var c=read();
+  if(c!=='granted' && c!=='denied')showBanner();
+})();
