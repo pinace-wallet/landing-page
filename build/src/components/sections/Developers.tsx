@@ -16,9 +16,9 @@ export default function Developers() {
         className="mt-6 text-[clamp(2rem,5vw,4rem)]"
       />
 
-      <div className="mt-14 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         {/* code */}
-        <Reveal className="overflow-hidden rounded-3xl border border-white/10 bg-black/60">
+        <Reveal className="flex h-full flex-col overflow-hidden border border-white/10 bg-black/60">
           <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3">
             <span className="h-3 w-3 rounded-full bg-pinace-pink/70" />
             <span className="h-3 w-3 rounded-full bg-pinace-amber/70" />
@@ -27,18 +27,18 @@ export default function Developers() {
               agent.ts — @pinace/agent-sdk
             </span>
           </div>
-          <pre className="onchain overflow-x-auto p-6 text-[13px] leading-relaxed text-white/80">
+          <pre className="onchain w-full min-h-0 flex-1 whitespace-pre-wrap break-words p-6 text-[12.5px] leading-relaxed text-white/80">
             <code>{sdkSnippet}</code>
           </pre>
         </Reveal>
 
         {/* tiers + CTA */}
-        <div className="flex flex-col gap-5">
+        <div className="flex h-full flex-col gap-5">
           <Reveal className="flex flex-col gap-3" stagger={0.08}>
             {sdkTiers.map((t) => (
               <div
                 key={t.pkg}
-                className="rounded-2xl border border-white/10 bg-[rgba(24,24,27,0.45)] p-5 transition-colors hover:border-white/20"
+                className="border border-white/10 bg-[rgba(24,24,27,0.45)] p-5 transition-colors hover:border-white/20"
               >
                 <p className="onchain text-[14px] font-medium text-pinace-blue-bright">
                   {t.pkg}
@@ -48,7 +48,7 @@ export default function Developers() {
             ))}
           </Reveal>
 
-          <Reveal className="relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--pinace-violet)_18%,transparent),color-mix(in_srgb,var(--pinace-blue)_12%,transparent))] p-7">
+          <Reveal className="relative flex flex-1 flex-col justify-center overflow-hidden border border-white/10 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--pinace-violet)_18%,transparent),color-mix(in_srgb,var(--pinace-blue)_12%,transparent))] p-7">
             <h3 className="font-heading text-xl font-semibold tracking-tight text-white">
               Publish a policy to the marketplace
             </h3>

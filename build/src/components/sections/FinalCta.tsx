@@ -12,7 +12,7 @@ export default function FinalCta() {
 
   return (
     <Section id="waitlist">
-      <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[radial-gradient(120%_120%_at_50%_0%,color-mix(in_srgb,var(--pinace-blue)_22%,transparent),transparent_60%)] px-7 py-16 text-center sm:px-12 sm:py-20">
+      <div className="relative overflow-hidden border border-white/10 bg-[radial-gradient(120%_120%_at_50%_0%,color-mix(in_srgb,var(--pinace-blue)_22%,transparent),transparent_60%)] px-7 py-16 text-center sm:px-12 sm:py-20">
         <SplitHeading
           as="h2"
           text="Let an agent work for you —"

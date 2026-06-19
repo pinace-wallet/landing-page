@@ -26,7 +26,7 @@ export default function Faq() {
             <AccordionItem
               key={f.q}
               value={`faq-${i}`}
-              className="rounded-2xl border border-white/10 bg-[rgba(24,24,27,0.45)] px-5 transition-colors hover:border-white/20"
+              className="border border-white/10 bg-[rgba(24,24,27,0.45)] px-5 transition-colors hover:border-white/20"
             >
               <AccordionTrigger className="font-heading py-5 text-left text-[17px] font-semibold tracking-tight text-white hover:no-underline">
                 {f.q}

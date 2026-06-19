@@ -77,7 +77,7 @@ export function TiltCard({
         } as React.CSSProperties
       }
       className={cn(
-        "group relative flex min-h-[300px] flex-col overflow-hidden rounded-3xl border border-white/10 p-8 [will-change:transform]",
+        "group relative flex min-h-[300px] flex-col overflow-hidden border border-white/10 p-8 [will-change:transform]",
         feature
           ? "bg-[linear-gradient(140deg,color-mix(in_srgb,var(--gc)_16%,transparent),transparent)]"
           : "bg-[rgba(24,24,27,0.45)]",
@@ -85,12 +85,6 @@ export function TiltCard({
         className,
       )}
     >
-      {/* top accent bar */}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[3px] opacity-90"
-        style={{ background: "var(--gc)" }}
-      />
       {/* cursor glow */}
       <span
         ref={glowRef}

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" fill="none">
+  <defs>
+    <linearGradient id="mainsail" x1="60" y1="30" x2="150" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5aa6ff"/>
+      <stop offset="0.5" stop-color="#a974ff"/>
+      <stop offset="1" stop-color="#2b8bff"/>
+    </linearGradient>
+    <linearGradient id="jib" x1="120" y1="60" x2="170" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ee6b6"/>
+      <stop offset="1" stop-color="#2b8bff"/>
+    </linearGradient>
+    <linearGradient id="hull" x1="40" y1="180" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1b2a4a"/>
+      <stop offset="1" stop-color="#0c1730"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#2b8bff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#2b8bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wave" x1="20" y1="235" x2="220" y2="235" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2b8bff"/>
+      <stop offset="0.5" stop-color="#5aa6ff"/>
+      <stop offset="1" stop-color="#2ee6b6"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="120" cy="150" rx="118" ry="120" fill="url(#glow)"/>
+
+  <!-- mast -->
+  <rect x="116" y="26" width="6" height="172" rx="3" fill="#cdd8f0"/>
+
+  <!-- main sail -->
+  <path d="M114 34 C 78 78, 64 134, 70 176 L114 176 Z" fill="url(#mainsail)"/>
+  <path d="M114 34 C 96 80, 92 132, 96 176 L114 176 Z" fill="#ffffff" opacity="0.12"/>
+
+  <!-- jib (front sail) -->
+  <path d="M124 56 C 150 96, 162 140, 158 176 L124 176 Z" fill="url(#jib)"/>
+
+  <!-- friendly mascot face on the main sail -->
+  <circle cx="92" cy="120" r="6.5" fill="#0b1024"/>
+  <circle cx="112" cy="120" r="6.5" fill="#0b1024"/>
+  <circle cx="94" cy="118" r="2" fill="#ffffff"/>
+  <circle cx="114" cy="118" r="2" fill="#ffffff"/>
+  <path d="M95 134 q 9 8 18 0" stroke="#0b1024" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+  <!-- hull -->
+  <path d="M44 182 L196 182 C 188 214, 158 232, 120 232 C 82 232, 52 214, 44 182 Z" fill="url(#hull)" stroke="#2b3a5e" stroke-width="2"/>
+  <rect x="56" y="190" width="128" height="5" rx="2.5" fill="#2b8bff" opacity="0.7"/>
+
+  <!-- waves -->
+  <path d="M16 244 q 16 -12 32 0 t 32 0 t 32 0 t 32 0 t 32 0 t 32 0" stroke="url(#wave)" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M24 258 q 16 -10 32 0 t 32 0 t 32 0 t 32 0 t 32 0" stroke="url(#wave)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.5"/>
+</svg>

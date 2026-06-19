@@ -25,7 +25,7 @@ export default function Capabilities() {
         {capabilities.map((col) => (
           <div
             key={col.title}
-            className="rounded-3xl border border-white/10 bg-[rgba(24,24,27,0.45)] p-8 transition-colors hover:border-white/20"
+            className="border border-white/10 bg-[rgba(24,24,27,0.45)] p-8 transition-colors hover:border-white/20"
           >
             <div className="mb-5 flex items-center gap-3">
               <span className={cn("h-2.5 w-2.5 rounded-full", toneDot[col.tone])} />

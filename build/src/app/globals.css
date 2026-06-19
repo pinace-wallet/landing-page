@@ -58,37 +58,37 @@
   /* Fontshare families (loaded via <link> in layout) */
   --font-satoshi: "Satoshi";
 
-  /* raw brand */
-  --pinace-blue: #006fee;
-  --pinace-blue-bright: #3d7bff;
-  --pinace-blue-soft: #9dc2eb;
-  --pinace-violet: #9b5cff;
-  --pinace-pink: #f31260;
-  --pinace-teal: #17c9a0;
-  --pinace-amber: #f5a524;
-  --pinace-green: #17c964;
+  /* raw brand — brighter, more saturated for a luminous, high-contrast feel */
+  --pinace-blue: #2b8bff;
+  --pinace-blue-bright: #5aa6ff;
+  --pinace-blue-soft: #b9d6ff;
+  --pinace-violet: #a974ff;
+  --pinace-pink: #ff3d81;
+  --pinace-teal: #2ee6b6;
+  --pinace-amber: #ffb238;
+  --pinace-green: #2ee06a;
 
   --radius: 0.85rem;
 
-  /* dark theme (the only theme) */
+  /* dark theme (the only theme) — pure black for maximum contrast */
   --background: #000000;
-  --foreground: #fafafa;
-  --card: rgba(24, 24, 27, 0.5);
-  --card-foreground: #fafafa;
-  --popover: #0a0a0c;
-  --popover-foreground: #fafafa;
-  --primary: #006fee;
+  --foreground: #f7faff;
+  --card: rgba(20, 24, 38, 0.5);
+  --card-foreground: #f7faff;
+  --popover: #050608;
+  --popover-foreground: #f5f8ff;
+  --primary: #2b8bff;
   --primary-foreground: #ffffff;
-  --secondary: #18181b;
-  --secondary-foreground: #fafafa;
-  --muted: #18181b;
-  --muted-foreground: #a1a1aa;
-  --accent: #18181b;
-  --accent-foreground: #fafafa;
-  --destructive: #f31260;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: #006fee;
+  --secondary: #161b2c;
+  --secondary-foreground: #f5f8ff;
+  --muted: #161b2c;
+  --muted-foreground: #aab4cf;
+  --accent: #161b2c;
+  --accent-foreground: #f5f8ff;
+  --destructive: #ff2d6f;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #2b8bff;
 }
 
 @layer base {
@@ -132,9 +132,48 @@
   /* glass surface — purposeful use only (DESIGN.md) */
   .glass {
     background: var(--card);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
     border: 1px solid var(--border);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 24px 60px -24px rgba(0, 0, 0, 0.7);
+  }
+
+  /* animated gradient-shine headline accent (mirrors the reference .grad) */
+  .text-shine {
+    background: linear-gradient(
+      100deg,
+      var(--pinace-blue-bright),
+      var(--pinace-violet),
+      var(--pinace-teal),
+      var(--pinace-blue-bright)
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: pinace-shine 6s linear infinite;
+  }
+  @keyframes pinace-shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .text-shine {
+      animation: none;
+    }
+  }
+
+  /* soft brand glow behind a focal element */
+  .glow-blue {
+    box-shadow: 0 0 80px -10px color-mix(in srgb, var(--pinace-blue) 60%, transparent);
+  }
+  /* thin top hairline highlight for cards */
+  .lift {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
   }
   .text-balance {
     text-wrap: balance;
@@ -154,6 +193,106 @@
     will-change: transform;
   }
 
+  /* ── Pinace logo icon (Model / What is Pinace section) ─────────────────── */
+
+  /* Outer container: slow float + glow */
+  .pinace-logo-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: logo-float 5s ease-in-out infinite;
+    filter: drop-shadow(0 0 32px color-mix(in srgb, var(--pinace-violet) 55%, transparent))
+            drop-shadow(0 0 64px color-mix(in srgb, var(--pinace-blue) 30%, transparent));
+    transition: filter 0.5s ease;
+  }
+
+  .pinace-logo-wrap:hover {
+    filter: drop-shadow(0 0 40px color-mix(in srgb, var(--pinace-violet) 80%, transparent))
+            drop-shadow(0 0 80px color-mix(in srgb, var(--pinace-blue) 50%, transparent))
+            drop-shadow(0 0 120px color-mix(in srgb, var(--pinace-pink) 25%, transparent));
+    animation-play-state: paused;
+  }
+
+  @keyframes logo-float {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    30%       { transform: translateY(-14px) rotate(1.5deg); }
+    60%       { transform: translateY(-7px) rotate(-0.5deg); }
+  }
+
+  /* Spinning halo ring behind the logo */
+  .pinace-logo-halo {
+    position: absolute;
+    inset: -28px;
+    border-radius: 9999px;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      color-mix(in srgb, var(--pinace-violet) 70%, transparent) 60deg,
+      color-mix(in srgb, var(--pinace-blue) 80%, transparent) 120deg,
+      transparent 180deg,
+      color-mix(in srgb, var(--pinace-teal) 60%, transparent) 240deg,
+      color-mix(in srgb, var(--pinace-pink) 70%, transparent) 300deg,
+      transparent 360deg
+    );
+    animation: halo-spin 8s linear infinite;
+    mask: radial-gradient(farthest-side, transparent 70%, black 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent 70%, black 100%);
+    opacity: 0.75;
+    transition: opacity 0.4s ease;
+  }
+
+  .pinace-logo-wrap:hover .pinace-logo-halo {
+    opacity: 1;
+    animation-duration: 3s;
+  }
+
+  @keyframes halo-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Glassy frosted disc underneath the SVG */
+  .pinace-logo-glass {
+    position: absolute;
+    inset: -8px;
+    border-radius: 9999px;
+    background: radial-gradient(
+      ellipse at 40% 30%,
+      rgba(169, 116, 255, 0.12) 0%,
+      rgba(43, 139, 255, 0.08) 50%,
+      transparent 75%
+    );
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Shimmer sweep over the logo on a loop */
+  .pinace-logo-shimmer {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: logo-shimmer 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes logo-shimmer {
+    0%   { background-position: -100% 0; opacity: 0; }
+    20%  { opacity: 1; }
+    60%  { background-position: 200% 0; opacity: 0; }
+    100% { background-position: 200% 0; opacity: 0; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -165,5 +304,41 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
     }
+    .pinace-logo-wrap {
+      animation: none;
+    }
+    .pinace-logo-halo {
+      animation: none;
+    }
+  }
+
+  /* ── Wave UI Animations & Styling ─────────────────── */
+  .wave-animation-slow {
+    animation: wave-slow 25s linear infinite;
+    will-change: transform;
+  }
+
+  .wave-animation-fast {
+    animation: wave-fast 16s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes wave-slow {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes wave-fast {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 }
+

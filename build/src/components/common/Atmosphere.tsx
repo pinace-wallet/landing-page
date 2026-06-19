@@ -18,8 +18,8 @@ export function Atmosphere() {
     () => {
       const reduced = prefersReducedMotion();
 
-      // Reveal the field softly on mount.
-      gsap.to("[data-orbfield]", { opacity: reduced ? 0.4 : 0.5, duration: 1.2 });
+      // Reveal the field softly on mount (restrained so pure black dominates).
+      gsap.to("[data-orbfield]", { opacity: reduced ? 0.32 : 0.42, duration: 1.2 });
 
       // Scroll progress bar.
       gsap.to(barRef.current, {

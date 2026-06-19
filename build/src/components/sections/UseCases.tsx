@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Section } from "@/components/common/Section";
-import { SectionKicker } from "@/components/common/SectionKicker";
 import { SplitHeading } from "@/components/common/SplitHeading";
+import { Reveal } from "@/components/common/Reveal";
 import { gsap, useGSAP, canHover, prefersReducedMotion } from "@/lib/gsap";
 import { useCases } from "@/lib/site";
 
@@ -17,13 +17,14 @@ const toneText = {
 export default function UseCases() {
   const scope = useRef<HTMLDivElement>(null);
   const peekRef = useRef<HTMLDivElement>(null);
-  const [peekImg, setPeekImg] = useState<string | null>(null);
+  const [peek, setPeek] = useState<{ img: string; name: string } | null>(null);
   const [active, setActive] = useState<number | null>(null);
 
   // peek follows the cursor with a soft lerp (desktop pointers only)
   useGSAP(
     () => {
-      if (!peekRef.current || prefersReducedMotion() || !canHover()) return;
+      if (!peekRef.current) return;
+      gsap.set(peekRef.current, { xPercent: -50, yPercent: -50 });
       const xTo = gsap.quickTo(peekRef.current, "x", { duration: 0.5, ease: "power3" });
       const yTo = gsap.quickTo(peekRef.current, "y", { duration: 0.5, ease: "power3" });
       const onMove = (e: PointerEvent) => {
@@ -32,8 +33,7 @@ export default function UseCases() {
       };
       window.addEventListener("pointermove", onMove);
       return () => window.removeEventListener("pointermove", onMove);
-    },
-    { scope },
+    }
   );
 
   const onClose = useCallback(() => setActive(null), []);
@@ -52,12 +52,27 @@ export default function UseCases() {
 
   return (
     <Section id="use-cases">
-      <SectionKicker tone="pink">In action</SectionKicker>
+      <div className="mb-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <span className="font-heading text-[clamp(1.6rem,3.4vw,2.4rem)] font-bold uppercase tracking-tight text-pinace-pink">
+          For example
+        </span>
+        <span className="onchain rounded-full border border-pinace-pink/40 bg-pinace-pink/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-pinace-pink">
+          not built by Pinace
+        </span>
+      </div>
       <SplitHeading
-        text="Agents that run, bounded by"
+        text="Apps you'd grant, bounded by"
         accent="policy."
-        className="mt-6 text-[clamp(2rem,5vw,4rem)]"
+        className="text-[clamp(2rem,5vw,4rem)]"
       />
+      <Reveal className="mt-5" y={16}>
+        <p className="max-w-2xl text-lg text-white/60">
+          These are <b className="font-semibold text-white">example</b> third-party agents
+          and apps. A user deposits into a pool, confirms a policy that lets the app in,
+          and it transacts automatically within those bounds. Hover to see what each does
+          through the protocol.
+        </p>
+      </Reveal>
 
       <div ref={scope} className="mt-12 border-t border-white/10">
         {useCases.map((u, i) => (
@@ -65,8 +80,10 @@ export default function UseCases() {
             key={u.k}
             type="button"
             data-cursor="grow"
-            onPointerEnter={() => canHover() && setPeekImg(u.img)}
-            onPointerLeave={() => setPeekImg(null)}
+            onPointerEnter={() =>
+              setPeek({ img: u.img, name: u.k })
+            }
+            onPointerLeave={() => setPeek(null)}
             onClick={() => setActive(i)}
             className="group flex w-full items-center justify-between gap-6 border-b border-white/10 py-7 text-left transition-[padding] duration-300 hover:px-4 sm:py-8"
           >
@@ -74,9 +91,9 @@ export default function UseCases() {
               <Image
                 src={u.avatar}
                 alt={`${u.k} agent`}
-                width={46}
-                height={46}
-                className="hidden h-11 w-11 flex-none rounded-full sm:block"
+                width={48}
+                height={48}
+                className="hidden h-12 w-12 flex-none rounded-full sm:block"
               />
               <span className="min-w-0">
                 <span
@@ -84,7 +101,11 @@ export default function UseCases() {
                 >
                   {u.k}
                 </span>
-                <span className="mt-1 block truncate text-sm text-white/45">
+                {/* function — revealed on hover */}
+                <span className="block max-h-0 overflow-hidden text-[14px] text-white/55 opacity-0 transition-all duration-300 group-hover:mt-1 group-hover:max-h-12 group-hover:opacity-100">
+                  {u.fn}
+                </span>
+                <span className="mt-1 block text-sm text-white/40 group-hover:hidden">
                   {u.tag}
                 </span>
               </span>
@@ -96,26 +117,31 @@ export default function UseCases() {
         ))}
       </div>
 
-      {/* cursor-following peek */}
+      {/* cursor-following portrait peek (matches the phone screenshots) */}
       <div
         ref={peekRef}
         aria-hidden
-        className={`pointer-events-none fixed left-0 top-0 z-[50] hidden h-[240px] w-[330px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[18px] border border-white/10 shadow-2xl shadow-black/60 transition-opacity duration-300 md:block ${
-          peekImg ? "opacity-100" : "opacity-0"
+        className={`pointer-events-none fixed left-0 top-0 z-[50] hidden h-[360px] w-[210px] overflow-hidden border border-white/15 shadow-2xl shadow-black/60 transition-opacity duration-300 sm:block ${
+          peek ? "opacity-100" : "opacity-0"
         }`}
       >
-        {peekImg && (
-          <Image
-            src={peekImg}
-            alt=""
-            fill
-            sizes="330px"
-            className="object-cover object-top"
-          />
+        {peek && (
+          <>
+            <Image
+              src={peek.img}
+              alt=""
+              fill
+              sizes="210px"
+              className="object-cover object-top"
+            />
+            <span className="onchain absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-3 text-[12px] text-white/85">
+              {peek.name}
+            </span>
+          </>
         )}
       </div>
 
-      {/* detail modal */}
+      {/* detail modal — phone screenshot framed correctly */}
       {current && (
         <div className="fixed inset-0 z-[9000] flex items-center justify-center p-5">
           <button
@@ -124,7 +150,7 @@ export default function UseCases() {
             onClick={onClose}
             className="absolute inset-0 bg-black/70 backdrop-blur-md"
           />
-          <div className="relative z-[2] max-h-[88vh] w-full max-w-[720px] overflow-auto rounded-[26px] border border-white/10 bg-[#0a0a0c]">
+          <div className="relative z-[2] grid max-h-[88vh] w-full max-w-[760px] overflow-auto border border-white/12 bg-[#0b0f1d] sm:grid-cols-[0.8fr_1fr]">
             <button
               type="button"
               onClick={onClose}
@@ -133,32 +159,34 @@ export default function UseCases() {
             >
               ✕
             </button>
-            <div className="relative h-[230px] w-full overflow-hidden border-b border-white/10">
+            {/* phone image */}
+            <div className="relative min-h-[260px] overflow-hidden border-b border-white/10 bg-black sm:border-b-0 sm:border-r">
               <Image
                 src={current.img}
                 alt={`${current.k} in the Pinace wallet`}
                 fill
-                sizes="720px"
+                sizes="(max-width: 640px) 100vw, 300px"
                 className="object-cover object-top"
               />
             </div>
-            <div className="p-8 sm:p-10">
-              <div className="flex items-center gap-4">
+            {/* text */}
+            <div className="p-7 sm:p-8">
+              <div className="flex items-center gap-3">
                 <Image
                   src={current.avatar}
                   alt=""
-                  width={44}
-                  height={44}
+                  width={42}
+                  height={42}
                   className="rounded-full"
                 />
-                <h3 className="font-heading text-3xl font-semibold tracking-tight text-white">
+                <h3 className="font-heading text-2xl font-semibold tracking-tight text-white">
                   {current.k}
                 </h3>
               </div>
               <p className="mt-2 text-sm uppercase tracking-wide text-white/40">
                 {current.tag}
               </p>
-              <p className="mt-5 text-[16px] leading-relaxed text-white/70">
+              <p className="mt-5 text-[15.5px] leading-relaxed text-white/70">
                 {current.desc}
               </p>
               <div className="mt-6 flex flex-wrap gap-2">

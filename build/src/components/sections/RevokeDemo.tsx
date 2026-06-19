@@ -69,7 +69,7 @@ export default function RevokeDemo() {
         {/* interactive terminal */}
         <div
           ref={scope}
-          className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/60 p-6 sm:p-8"
+          className="relative overflow-hidden border border-white/10 bg-black/60 p-6 sm:p-8"
         >
           <div className="onchain space-y-2 text-[13.5px] leading-relaxed">
             <p className="text-white/45">
@@ -113,7 +113,7 @@ export default function RevokeDemo() {
             >
               <div
                 data-denied-card
-                className="flex flex-col items-center gap-2 rounded-2xl border border-pinace-pink bg-[rgba(30,6,14,0.92)] px-10 py-6 shadow-[0_0_60px_rgba(243,18,96,0.5)]"
+                className="flex flex-col items-center gap-2 border border-pinace-pink bg-[rgba(30,6,14,0.92)] px-10 py-6 shadow-[0_0_60px_rgba(243,18,96,0.5)]"
               >
                 <span className="onchain text-[clamp(22px,5vw,34px)] font-bold tracking-[0.14em] text-pinace-pink">
                   E_REVOKED

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Download } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { Container } from "@/components/common/Container";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,33 +13,32 @@ export default function Nav() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-[60]">
-      <Container className="flex h-[76px] items-center justify-between">
+      <Container className="flex h-[76px] items-center gap-6">
         <a href="#top" aria-label="Pinace home">
           <Logo />
         </a>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          {site.nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="group relative text-sm font-medium text-white/70 transition-colors hover:text-white"
-            >
-              {item.label}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-white transition-all duration-300 group-hover:w-full" />
-            </a>
-          ))}
-        </nav>
+        <div className="flex flex-1 items-center justify-end gap-6 md:gap-8">
+          <nav className="hidden items-center gap-8 md:flex">
+            {site.nav.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="group relative text-sm font-medium text-white/70 transition-colors hover:text-white"
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-0 h-px w-0 bg-white transition-all duration-300 group-hover:w-full" />
+              </a>
+            ))}
+          </nav>
 
-        <div className="hidden md:block">
           <a
             href={site.chromeStoreUrl}
-            className={cn(
-              buttonVariants(),
-              "h-10 rounded-full bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90",
-            )}
+            aria-label="Add to Chrome"
+            title="Add to Chrome"
+            className="text-white/85 transition-colors hover:text-pinace-blue-bright"
           >
-            Add to Chrome
+            <Download className="size-5" />
           </a>
         </div>
 

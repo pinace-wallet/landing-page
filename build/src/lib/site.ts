@@ -7,11 +7,15 @@ export const site = {
   chromeStoreUrl: "#install",
   docsUrl: "#developers",
   githubUrl: "https://github.com/pinace-wallet",
+  // POC "Dex Agent" — a chat app on @pinace/agent-sdk that runs bounded swaps on
+  // DeepBook v3. Will be deployed; replace "#" with the live URL when it ships.
+  pocAgentUrl: "#",
+  pocAgentLive: false,
   nav: [
+    { label: "Products", href: "#products" },
     { label: "How it works", href: "#how" },
-    { label: "Features", href: "#features" },
+    { label: "Build", href: "#ideas" },
     { label: "Developers", href: "#developers" },
-    { label: "Team", href: "#team" },
   ],
 } as const;
 
@@ -21,9 +25,9 @@ export const hero = {
   // headline is rendered as reveal rows; last word is the drenched-blue accent.
   headlineRows: ["Let AI trade", "for you — without", "handing over"],
   headlineAccent: "your keys.",
-  sub: "Pinace lets you delegate a budget and a rulebook to AI agents. The limits are enforced by Move smart contracts on-chain — and you can revoke access in one click.",
+  sub: "Give an AI agent a budget and a rulebook, not your private key. Pinace keeps funds in your on-chain pool, enforces every limit with Move, and lets you revoke access in one click.",
   primaryCta: { label: "Add to Chrome", href: "#install" },
-  secondaryCta: { label: "Watch it work", href: "#how" },
+  secondaryCta: { label: "View docs", href: "#developers" },
 } as const;
 
 export const steps = [
@@ -76,14 +80,14 @@ export const features = [
   },
 ] as const;
 
+// Only what the Pinace codebase actually builds on (from package.json + imports).
 export const suiPrimitives = [
+  "Sui Move",
+  "@mysten/sui",
   "Sui Wallet Standard",
+  "@mysten/dapp-kit",
   "DeepBook v3",
-  "Walrus",
-  "Seal",
-  "zkLogin",
-  "Enoki",
-  "Pyth",
+  "BCS · codegen",
 ] as const;
 
 export const team = [
@@ -191,74 +195,66 @@ export const capabilities = [
   },
 ] as const;
 
-// Use-case rows with hover-peek + modal (mirrors the reference's projects list).
+// Example third-party agents/apps a user grants pool access to (NOT built by Pinace).
+// `fn` = what each does *through the Pinace protocol*, revealed on hover.
 export const useCases = [
   {
     k: "DeepAge",
     tone: "pink" as const,
     img: "/agents/app-detail.png",
     avatar: "/agents/deepage.svg",
-    tag: "DCA on DeepBook v3 · the reference agent",
-    meta: "DCA · DeepBook",
-    desc: "The flagship POC. Tell it: \"Swap 100 SUI to USDC, max 12% slippage, over 1 day.\" It executes DCA orders on DeepBook v3 inside a policy you set — and you watch every fill on the timeline.",
-    tags: ["DeepBook v3", "OpenAI", "DCA", "Pyth"],
+    tag: "Example agent · trading",
+    fn: "Runs DCA swaps on DeepBook v3 — only within the budget, token list and slippage policy you grant.",
+    meta: "Trading",
+    desc: "An example trading agent. You deposit into a pool and grant it a swap policy; it then dollar-cost-averages on DeepBook v3 inside those exact bounds, and you watch every fill on the timeline. Revoke any time.",
+    tags: ["Grant-scoped", "DeepBook v3", "Auto-DCA"],
   },
   {
     k: "KuanQue",
     tone: "teal" as const,
     img: "/agents/app-agents.png",
     avatar: "/agents/kuanque.svg",
-    tag: "Range rebalancer, bounded by policy",
-    meta: "Rebalance",
-    desc: "A liquidity agent that rebalances a position within budget and slippage limits. When the job is done, its status flips to Done — and you can revoke at any point.",
-    tags: ["Rebalance", "Bounded", "Policy"],
+    tag: "Example app · liquidity",
+    fn: "Rebalances an LP position automatically — capped by the budget and token whitelist on your pool.",
+    meta: "Liquidity",
+    desc: "An example liquidity app a user registers to manage a position. It rebalances automatically within the policy you set; when its job is done the status flips to Done, and access ends the moment you revoke.",
+    tags: ["Grant-scoped", "Rebalance", "Revocable"],
   },
   {
     k: "MBO",
     tone: "blue" as const,
     img: "/agents/app-home.png",
     avatar: "/agents/mbo.svg",
-    tag: "Idle until you delegate, never before",
+    fn: "Idle until you grant a policy — then acts on-demand, never able to touch funds outside its scope.",
+    tag: "Example agent · on-demand",
     meta: "On-demand",
-    desc: "An agent only acts when you've delegated a pool and policy. Idle by default, it can never touch funds outside its bounds — the wallet shows exactly what it's allowed to do.",
-    tags: ["On-demand", "Scoped", "Revocable"],
+    desc: "An example on-demand agent. It stays idle until you deposit a pool and confirm a policy grant. From then on it transacts automatically within scope — and can never reach funds the policy doesn't allow.",
+    tags: ["Grant-scoped", "On-demand", "Bounded"],
   },
 ] as const;
 
-// The three core products — each with the painpoint it kills + the breakthrough.
+// The three core products — concise painpoint → what Pinace provides (text-only).
 export const products = [
   {
     tone: "blue" as const,
-    tag: "Wallet · Browser extension",
-    title: "The Wallet",
-    pain: "Letting an AI agent trade means giving up your keys or signing every transaction.",
-    breakthrough:
-      "A non-custodial wallet to connect an agent, set its policy, watch a live milestone timeline, and revoke in one click.",
-    special: "Sui Wallet Standard · zkLogin onboarding · live on Chrome",
-    points: ["Connect & scope agents", "Track progress on-chain", "1-click revoke"],
-    asset: "/agents/app-agents.png",
+    name: "Wallet",
+    tag: "Browser extension",
+    pain: "Letting an app trade for you used to mean handing over your keys, or signing every single transaction.",
+    give: "A non-custodial wallet where you grant a scoped policy, watch the agent work in real time, and revoke in one click.",
   },
   {
     tone: "violet" as const,
-    tag: "Protocol · Move contracts",
-    title: "The Protocol",
-    pain: "Sui has no allowance or session keys — agents can't get bounded authority natively.",
-    breakthrough:
-      "BalancePool escrow + Policy objects + a hot-potato PTB where the compiler itself enforces the budget. Revocation is one on-chain tx.",
-    special: "Protocol-agnostic — gates ANY Sui Move call",
-    points: ["BalancePool escrow", "propose → settle, atomic", "E_REVOKED on revoke"],
-    asset: "/agents/app-detail.png",
+    name: "Protocol",
+    tag: "Move contracts on Sui",
+    pain: "Sui has no allowances or session keys, so delegated authority couldn't be bounded natively — it was all or nothing.",
+    give: "A BalancePool escrow and policy objects where the Move compiler itself enforces your budget on every atomic transaction.",
   },
   {
     tone: "teal" as const,
-    tag: "SDK · TypeScript",
-    title: "The SDK",
-    pain: "Builders need a standard, safe way to make agents act and to ship reusable policies.",
-    breakthrough:
-      "A three-tier SDK (wallet · agent · MCP). proposeAction → settle in a few lines, and publish a policy to the marketplace.",
-    special: "MCP-compliant for LLM tool use (Claude, GPT)",
-    points: ["@pinace/agent-sdk", "MCP server", "Publish policies"],
-    asset: "/agents/app-activity.png",
+    name: "SDK",
+    tag: "TypeScript",
+    pain: "Builders had no standard, safe way to let an agent act on a user's funds, or to ship a reusable policy.",
+    give: "A three-tier SDK — wallet, agent, and MCP — that takes you from intent to settled transaction in a few lines.",
   },
 ] as const;
 
@@ -300,4 +296,3 @@ export const faqs = [
     a: "Pinace is protocol-agnostic and gates any Sui Move call. The reference agent trades on DeepBook v3, with Walrus, Seal, Pyth, zkLogin and Enoki in the stack.",
   },
 ] as const;
-
