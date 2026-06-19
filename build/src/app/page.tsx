@@ -28,7 +28,7 @@ export default function Home() {
         <Hero />
         <div className="relative z-10 -mt-[clamp(100px,14vw,200px)] bg-[#05070f]/85 shadow-[0_-30px_80px_-30px_rgba(0,0,0,0.7)] backdrop-blur-md">
           {/* Wave decoration overlapping the hero boat logo */}
-          <div className="absolute left-0 right-0 top-0 z-20 h-[clamp(60px,9vw,120px)] w-full -translate-y-[98%] pointer-events-none overflow-hidden select-none">
+          <div className="absolute left-0 right-0 top-0 z-20 h-[clamp(90px,12vw,160px)] w-full -translate-y-[98%] pointer-events-none overflow-hidden select-none">
             {/* Background wave with soft brand/glow fills */}
             <svg
               className="absolute left-0 top-0 h-full w-[200%] wave-animation-slow"

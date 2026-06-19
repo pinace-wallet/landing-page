@@ -311,34 +311,35 @@
       animation: none;
     }
   }
+}
 
-  /* ── Wave UI Animations & Styling ─────────────────── */
-  .wave-animation-slow {
-    animation: wave-slow 25s linear infinite;
-    will-change: transform;
+
+/* ── Wave UI Animations & Styling ─────────────────── */
+.wave-animation-slow {
+  animation: wave-slow 25s linear infinite;
+  will-change: transform;
+}
+
+.wave-animation-fast {
+  animation: wave-fast 16s linear infinite;
+  will-change: transform;
+}
+
+@keyframes wave-slow {
+  0% {
+    transform: translateX(0);
   }
-
-  .wave-animation-fast {
-    animation: wave-fast 16s linear infinite;
-    will-change: transform;
+  100% {
+    transform: translateX(-50%);
   }
+}
 
-  @keyframes wave-slow {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
+@keyframes wave-fast {
+  0% {
+    transform: translateX(-50%);
   }
-
-  @keyframes wave-fast {
-    0% {
-      transform: translateX(-50%);
-    }
-    100% {
-      transform: translateX(0);
-    }
+  100% {
+    transform: translateX(0);
   }
 }
 

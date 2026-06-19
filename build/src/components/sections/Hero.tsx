@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 export default function Hero() {
   const scope = useRef<HTMLDivElement>(null);
+  const boatRef = useRef<HTMLImageElement>(null);
+  const boatContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -28,36 +30,41 @@ export default function Hero() {
           "[data-hero='cta']",
           { opacity: 0, y: 16, duration: 0.6 },
           "-=0.4",
-        )
-        .from("[data-hero='logo']", { opacity: 0, y: 40, duration: 1.1 }, "-=0.6");
+        );
 
-      // Bobbing up-down
-      gsap.to("[data-hero='logo'] img", {
-        y: 42,
-        duration: 4.8,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
+      if (boatContainerRef.current) {
+        tl.from(boatContainerRef.current, { opacity: 0, y: 40, duration: 1.1 }, "-=0.6");
+      }
 
-      // Tilting sway
-      gsap.to("[data-hero='logo'] img", {
-        rotation: 10.5,
-        duration: 5.6,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        transformOrigin: "50% 90%",
-      });
+      if (boatRef.current) {
+        // Bobbing up-down
+        gsap.to(boatRef.current, {
+          y: 42,
+          duration: 4.8,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
 
-      // Gentle horizontal drift
-      gsap.to("[data-hero='logo'] img", {
-        x: 18,
-        duration: 6.4,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
+        // Tilting sway
+        gsap.to(boatRef.current, {
+          rotation: 10.5,
+          duration: 5.6,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+          transformOrigin: "50% 90%",
+        });
+
+        // Gentle horizontal drift
+        gsap.to(boatRef.current, {
+          x: 18,
+          duration: 6.4,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
+      }
 
       const failsafe = window.setTimeout(() => tl.progress(1), 2800);
       return () => window.clearTimeout(failsafe);
@@ -69,11 +76,11 @@ export default function Hero() {
     <section
       id="top"
       ref={scope}
-      className="relative flex min-h-[112dvh] flex-col justify-center overflow-x-hidden px-0 pb-0 pt-[clamp(108px,12vh,138px)]"
+      className="relative min-h-[100dvh] overflow-x-clip px-0"
+      style={{ paddingTop: 'clamp(180px, 22vh, 230px)', paddingBottom: '200px' }}
     >
       <Container>
-        {/* Original translate-y trick: visually shifts content down without breaking flex layout */}
-        <div className="mx-auto w-[min(92vw,940px)] max-w-full translate-y-[clamp(72px,11vh,140px)]">
+        <div className="mx-auto w-[min(92vw,940px)] max-w-full">
           <h1 className="sr-only">Pinace. Delegate, don&apos;t trust.</h1>
 
           <div className="mb-2 flex flex-wrap items-center gap-3">
@@ -153,20 +160,22 @@ export default function Hero() {
         </div>
       </Container>
 
-      {/* Boat: sits below content, negative mb pulls next section's wave layer up over the hull */}
+      {/* Boat: large mt creates gap below content; negative mb overlaps into next section */}
       <div
+        ref={boatContainerRef}
         data-hero="logo"
         aria-hidden
-        className="relative mt-16 flex w-full justify-center px-4"
-        style={{ marginBottom: "-160px" }}
+        className="relative flex w-full justify-center px-4"
+        style={{ marginTop: '130px', marginBottom: '0px' }}
       >
         <Image
+          ref={boatRef}
           src="/brand/logo_boat.svg"
           alt=""
           width={460}
           height={510}
           priority
-          className="h-auto w-[clamp(300px,38vw,520px)] opacity-[0.75] brightness-[1.1] contrast-[1.05] drop-shadow-[0_0_45px_rgba(0,111,238,0.35)] will-change-transform"
+          className="h-auto w-[clamp(260px,30vw,420px)] opacity-[0.75] brightness-[1.1] contrast-[1.05] drop-shadow-[0_0_45px_rgba(0,111,238,0.35)] will-change-transform"
         />
       </div>
     </section>
