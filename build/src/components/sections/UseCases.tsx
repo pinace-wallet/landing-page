@@ -5,7 +5,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { Section } from "@/components/common/Section";
 import { SplitHeading } from "@/components/common/SplitHeading";
 import { Reveal } from "@/components/common/Reveal";
-import { gsap, useGSAP, canHover, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { useCases } from "@/lib/site";
 
 const toneText = {
@@ -17,7 +17,6 @@ const toneText = {
 export default function UseCases() {
   const scope = useRef<HTMLDivElement>(null);
   const peekRef = useRef<HTMLDivElement>(null);
-  const [peek, setPeek] = useState<{ img: string; name: string } | null>(null);
   const [active, setActive] = useState<number | null>(null);
 
   // peek follows the cursor with a soft lerp (desktop pointers only)
@@ -84,8 +83,6 @@ export default function UseCases() {
             key={u.k}
             type="button"
             data-cursor="grow"
-            onPointerEnter={() => setPeek({ img: u.img, name: u.k })}
-            onPointerLeave={() => setPeek(null)}
             onClick={() => setActive(i)}
             className="group flex w-full items-center justify-between gap-6 border-b border-white/10 py-7 text-left transition-[padding] duration-300 hover:px-4 sm:py-8"
           >

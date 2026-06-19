@@ -7,7 +7,7 @@ import {
   useThree,
   useFrame,
 } from "@react-three/fiber";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 interface GooeyFilterProps {
@@ -118,7 +118,6 @@ function Scene({
 }: SceneProps) {
   const size = useThree((s) => s.size);
   const viewport = useThree((s) => s.viewport);
-  const camera = useThree((s) => s.camera);
 
   const dotMaterial = useMemo(() => new DotMaterial(), []);
   const mouseUv = useRef({ x: 0, y: 0 });
@@ -143,6 +142,7 @@ function Scene({
 
   useEffect(() => {
     if (!trail) return;
+    // eslint-disable-next-line react-hooks/immutability
     trail.minFilter = THREE.NearestFilter;
     trail.magFilter = THREE.NearestFilter;
     trail.wrapS = THREE.ClampToEdgeWrapping;
