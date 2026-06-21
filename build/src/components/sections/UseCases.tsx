@@ -1,16 +1,66 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, useCallback, useEffect } from "react";
-import { ArrowUpRight } from "lucide-react";
-import { Reveal } from "@/components/common/Reveal";
-import { gsap, useGSAP } from "@/lib/gsap";
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
+import { prefersReducedMotion } from "@/lib/gsap";
 import { useCases } from "@/lib/site";
 
+// Subscribe to the (hover: hover) capability without an SSR hydration mismatch.
+const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
+const subscribeHover = (cb: () => void) => {
+  const mq = window.matchMedia(HOVER_QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+
 export default function UseCases() {
-  const scope = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>(null);
 
+  // ---- cursor-following peek (mirrors the Hugo reference) ----
+  const peekRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef({ x: 0, y: 0 });
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const [lastIdx, setLastIdx] = useState(0);
+  const hoverable = useSyncExternalStore(
+    subscribeHover,
+    () => window.matchMedia(HOVER_QUERY).matches,
+    () => false,
+  );
+
+  // Track the pointer and lerp the peek card toward it for a smooth trail.
+  useEffect(() => {
+    if (!hoverable) return;
+    const ease = prefersReducedMotion() ? 1 : 0.12;
+    let raf = 0;
+    let cx = 0;
+    let cy = 0;
+    const onMove = (e: MouseEvent) => {
+      targetRef.current = { x: e.clientX, y: e.clientY };
+    };
+    const tick = () => {
+      cx += (targetRef.current.x - cx) * ease;
+      cy += (targetRef.current.y - cy) * ease;
+      if (peekRef.current) {
+        peekRef.current.style.left = `${cx}px`;
+        peekRef.current.style.top = `${cy}px`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    window.addEventListener("mousemove", onMove);
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", onMove);
+    };
+  }, [hoverable]);
+
+  // ---- detail modal ----
   const onClose = useCallback(() => setActive(null), []);
   useEffect(() => {
     if (active === null) return;
@@ -24,6 +74,9 @@ export default function UseCases() {
   }, [active, onClose]);
 
   const current = active !== null ? useCases[active] : null;
+  // Keep the last hovered item mounted during the fade-out for a clean exit.
+  const peekItem = useCases[hoverIdx ?? lastIdx];
+  const peekOn = hoverIdx !== null;
 
   return (
     <section id="use-cases" className="relative scroll-mt-24">
@@ -41,15 +94,17 @@ export default function UseCases() {
         </div>
 
         {/* Agent rows */}
-        <div
-          ref={scope}
-          className="mx-auto mt-14 max-w-5xl border-t border-black/10"
-        >
+        <div className="mx-auto mt-14 max-w-5xl border-t border-black/10">
           {useCases.map((u, i) => (
             <button
               key={u.k}
               type="button"
               onClick={() => setActive(i)}
+              onMouseEnter={() => {
+                setLastIdx(i);
+                setHoverIdx(i);
+              }}
+              onMouseLeave={() => setHoverIdx(null)}
               className="group flex w-full items-center justify-between gap-6 border-b border-black/10 py-7 text-left transition-[padding] duration-300 hover:px-4 sm:py-8"
             >
               <span className="flex min-w-0 items-center gap-5">
@@ -64,11 +119,7 @@ export default function UseCases() {
                   <span className="font-heading block truncate text-[clamp(1.5rem,4vw,2.6rem)] font-semibold tracking-tight text-black transition-colors group-hover:text-[#2b8bff]">
                     {u.k}
                   </span>
-                  {/* function — revealed on hover */}
-                  <span className="block max-h-0 overflow-hidden text-[14px] text-black/50 opacity-0 transition-all duration-300 group-hover:mt-1 group-hover:max-h-12 group-hover:opacity-100">
-                    {u.fn}
-                  </span>
-                  <span className="mt-1 block text-sm text-black/40 group-hover:hidden">
+                  <span className="mt-1 block text-sm text-black/40">
                     {u.tag}
                   </span>
                 </span>
@@ -80,6 +131,35 @@ export default function UseCases() {
           ))}
         </div>
       </div>
+
+      {/* cursor-following peek — image + description follow the pointer on hover */}
+      {hoverable && (
+        <div
+          ref={peekRef}
+          aria-hidden
+          className={`pointer-events-none fixed left-0 top-0 z-[60] w-[320px] -translate-x-1/2 -translate-y-1/2 rotate-[-6deg] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] transition-[opacity,transform] duration-300 ease-out ${
+            peekOn ? "scale-100 opacity-100" : "scale-90 opacity-0"
+          }`}
+        >
+          <div className="relative h-[200px] w-full bg-[#f5f5f7]">
+            <Image
+              src={peekItem.img}
+              alt=""
+              fill
+              sizes="320px"
+              className="object-cover object-top"
+            />
+          </div>
+          <div className="p-4">
+            <p className="font-heading text-base font-semibold tracking-tight text-black">
+              {peekItem.k}
+            </p>
+            <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-black/55">
+              {peekItem.fn}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* detail modal */}
       {current && (

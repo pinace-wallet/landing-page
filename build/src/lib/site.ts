@@ -220,8 +220,8 @@ export const useCases = [
   {
     k: "Pinace Agent",
     tone: "blue" as const,
-    img: "/agents/app-detail.png",
-    avatar: "/agents/fenik.svg",
+    img: "/agents/fenik.png",
+    avatar: "/agents/deepage.svg",
     tag: "Proof of concept · trading",
     fn: "Conversational on-chain trading: natural-language intent → quote → policy pre-flight → atomic settlement, bounded by user-owned capabilities.",
     meta: "PoC",
